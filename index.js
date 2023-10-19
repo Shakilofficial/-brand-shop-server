@@ -27,6 +27,16 @@ async function run() {
 
     const productCollection = client.db("productDB").collection("product");
 
+    app.get("/product/:brand", async (req, res) => {
+      const { brand } = req.params;
+      let query = {};
+      if (brand) {
+        query = { brand_name: brand };
+      }
+      const result = await productCollection.find(query).toArray();
+      res.send(result);
+    });
+
     app.post("/product", async (req, res) => {
       const newProduct = req.body;
       console.log(newProduct);
