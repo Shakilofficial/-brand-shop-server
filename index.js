@@ -26,9 +26,14 @@ async function run() {
     await client.connect();
 
     const productCollection = client.db("productDB").collection("product");
+    const cartsCollection = client.db("productDB").collection("carts");
 
     app.get("/product", async (req, res) => {
       const result = await productCollection.find().toArray();
+      res.send(result);
+    });
+    app.get("/cart", async (req, res) => {
+      const result = await cartsCollection.find().toArray();
       res.send(result);
     });
 
@@ -64,6 +69,11 @@ async function run() {
         $set: {
           image: updatedProduct.image,
           name: updatedProduct.name,
+          brand_name: updatedProduct.brand_name,
+          type: updatedProduct.type,
+          price: updatedProduct.price,
+          description: updatedProduct.description,
+          rating: updatedProduct.rating,
         },
       };
       const result = await productCollection.updateOne(
@@ -73,6 +83,29 @@ async function run() {
       );
       res.send(result);
     });
+
+    app.get("/cart/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const result = await cartsCollection.find(query).toArray();
+      res.send(result);
+    });
+    app.delete("/cart/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const query = { _id: new ObjectId(id) };
+      const result = await cartsCollection.deleteOne(query);
+      // console.log(result);
+      res.send(result);
+    });
+
+    app.post("/cart", async (req, res) => {
+      const newProduct = req.body;
+      // console.log(newProduct);
+      const result = await cartsCollection.insertOne(newProduct);
+      res.send(result);
+    });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
